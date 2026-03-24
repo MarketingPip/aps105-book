@@ -276,13 +276,13 @@ void printList(LinkedList *list) {
   <script type="application/json" data-kind="annotation">
   {
   "annotation": {
-    "36": "Start printList: current points to head (first node)",
-    "38": "Check loop condition: continue while current != NULL",
-    "39": "Print current node's data followed by '->'",
-    "40": "Move current pointer to the next node in the list"
+    "41": "Start printList: current points to head (first node)",
+    "43": "Check loop condition: continue while current != NULL",
+    "44": "Print current node's data followed by '->'",
+    "45": "Move current pointer to the next node in the list"
   },
    "folds": [
-   { "start": 24, "end": 33, "folded": true }
+   { "start": 30, "end": 39, "folded": true }
    ]
 }
   </script>
@@ -290,22 +290,28 @@ void printList(LinkedList *list) {
   #include &lt;stdio.h&gt;
   #include &lt;stdlib.h&gt;
 
-  typedef struct node {
+    typedef struct node {
       int data;
       struct node *next;
   } Node;
 
+  typedef struct {
+      Node *head;
+  } LinkedList;
+
   Node *createNode(int value);
-  void printList(Node *head);
+  void printList(LinkedList *list);
 
   int main(void) {
-      Node *head = NULL;
+      LinkedList list;
+      list.head = NULL;
 
-      head = createNode(1);
-      head->next = createNode(2);
-      head->next->next = createNode(4);
+      list.head = createNode(1);
+      list.head->next = createNode(2);
+      list.head->next->next = createNode(4);
 
-      printList(head); 
+      printList(&list);
+
       return 0;
   }
 
@@ -320,12 +326,12 @@ void printList(LinkedList *list) {
       return newNode;
   }
 
-  void printList(Node *head) {
-      Node *current = head;
+  void printList(LinkedList *list) {
+      Node *current = list->head;
 
       while (current != NULL) {
-        printf("%d ->", current->data);
-        current = current->next;
+          printf("%d ->", current->data);
+          current = current->next;
       }
   }
 </c-visualizer>
