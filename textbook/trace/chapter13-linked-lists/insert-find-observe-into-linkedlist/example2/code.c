@@ -1,57 +1,41 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 typedef struct node {
-  int data;
-  struct node *next;
+    int data;
+    struct node *next;
 } Node;
 
-typedef struct list {
-  Node *head;
-} LinkedList;
-
 Node *createNode(int value);
-bool insertAtFront(LinkedList *list, int value);
-void printList(LinkedList *list);
+void printList(Node *head);
 
 int main(void) {
-  LinkedList list;
-  list.head = createNode(1);
-  (list.head)->next = createNode(2);
-  insertAtFront(&list, 0);
-  printList(&list);
-  return 0;
-}
+    Node *head = NULL;
 
-bool insertAtFront(LinkedList *list, int value) {
-  Node *temp = createNode(value);
-  if (temp == NULL) {
-    return false;
-  }
-  temp->next = list->head;
-  list->head = temp;
-  return true;
-}
+    head = createNode(1);
+    head->next = createNode(2);
+    head->next->next = createNode(4);
 
-void printList(LinkedList *list) {
-  Node *current = list->head;
-
-  while (current != NULL) {
-    // Print out the data at this element.
-    printf("%d ->", current->data);
-    // Move to the next element in the list.
-    current = current->next;
-  }
+    printList(head); 
+    return 0;
 }
 
 Node *createNode(int value) {
-  Node *newNode = (Node *)malloc(sizeof(Node));
+    Node *newNode = (Node *)malloc(sizeof(Node));
 
-  if (newNode != NULL) {
-    newNode->data = value;
-    newNode->next = NULL;
-  }
+    if (newNode != NULL) {
+        newNode->data = value;
+        newNode->next = NULL;
+    }
 
-  return newNode;
+    return newNode;
+}
+
+void printList(Node *head) {
+    Node *current = head;
+
+    while (current != NULL) {
+      printf("%d ->", current->data);
+      current = current->next;
+    }
 }
