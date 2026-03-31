@@ -17,9 +17,9 @@ You must abide by the following constraints. Failure to meet a constraint will r
 1. You cannot modify the characters inside the string.
 2. You cannot create any other data structures (e.g., array, linked list, etc),
 3. Your function must only access valid indices of the array.
-4. You **cannot call** any functions in your implementation. 
+4. You **cannot call** any functions in your implementation.
 
-An example of one run of the program is below. You only need to implement the `countLetters` function. Assume a `main` function (that reads in a string, calls your function, and outputs the integer array) already exists. 
+An example of one run of the program is below. You only need to implement the `countLetters` function. Assume a `main` function (that reads in a string, calls your function, and outputs the integer array) already exists.
 
 <pre>
 Enter a sentence: hello, world
@@ -34,14 +34,14 @@ W: 1
 </pre>
 
 ```{code-block} c
-int countLetters(char *s, int count[]) {
+void countLetters(char *s, int count[]) {
 ```
 
 ````{admonition} Answer
 :class: dropdown
 
 ```{code-block} c
-int countLetters(char *s, int count[]) {
+void countLetters(char *s, int count[]) {
     int i = 0;
     int whichLetter;
     while (s[i] != '\0') {
@@ -57,9 +57,9 @@ int countLetters(char *s, int count[]) {
 
 **Question 10 in Winter 2022 Final Exam [Intermediate]**
 
-Write a function called `lastStringInString`, the prototype of which is provided below, that returns the pointer to the **last** occurrence of the string `s1` in the string `s2`. If the string `s1` cannot be found in the string `s2`, the function returns `NULL`. For example, if we are looking for the string `"is"` as `s1` in the string `"This is a sample string"` as `s2`, the pointer to the second `"is"` in the string `"s2"` will be returned by the function. Another example, if we are looking for the string `"the"` as `s1` in the string `s2` `"The apple"`, the function should return `NULL`. This is because `'t'` is lower case in `"the"`. 
+Write a function called `lastStringInString`, the prototype of which is provided below, that returns the pointer to the **last** occurrence of the string `s1` in the string `s2`. If the string `s1` cannot be found in the string `s2`, the function returns `NULL`. For example, if we are looking for the string `"is"` as `s1` in the string `"This is a sample string"` as `s2`, the pointer to the second `"is"` in the string `"s2"` will be returned by the function. Another example, if we are looking for the string `"the"` as `s1` in the string `s2` `"The apple"`, the function should return `NULL`. This is because `'t'` is lower case in `"the"`.
 
-**Note:** You can use any function from the library `string.h`, **except** for `strstr()` --- you are not allowed to use it.  
+**Note:** You can use any function from the library `string.h`, **except** for `strstr()` --- you are not allowed to use it.
 
 ```{code-block} c
 char *lastStringInString(char *s1, char *s2) {
@@ -76,7 +76,7 @@ char* lastStringInString(char* s1, char* s2) {
   char* lastFound = NULL;
   // Alternatively, we can write the while loop as:
   // while (endOfString - p >= strlen(s2))
-  // while (strlen(p) - str(s1)  >= 0)
+  // while (strlen(p) - strlen(s1) >= 0)
   while (*p != '\0') {
     if (strncmp(s1, p, strlen(s1)) == 0) {
       lastFound = p;
@@ -164,7 +164,7 @@ char* deleteSubString(char* source, char* substring) {
 
 ```{code-block} c
 char* deleteSubString(char* source, char* substring) {
-  char* result = (char*)malloc(sizeof(strlen(source)) + 1);
+  char* result = (char*)malloc(strlen(source) + 1);
   char *s, *r = result;
   bool deleted = false;
   for (s = source; *s != '\0'; s++) {
@@ -190,7 +190,7 @@ char* deleteSubString(char* source, char* substring) {
 
 **Question 13 in Fall 2015 Final Exam [Challenging]**
 
-Two strings are said to be anagrams of each other if they are of the same length, and contain the same characters in a (possibly) different order. For example, `"elvis"` is an anagram of `"lives"`, and `"the morse code"` is an anagram of `"here come dots"`. 
+Two strings are said to be anagrams of each other if they are of the same length, and contain the same characters in a (possibly) different order. For example, `"elvis"` is an anagram of `"lives"`, and `"the morse code"` is an anagram of `"here come dots"`.
 
 You are to write a C function `isAnagram`, with the prototype given below, that returns `true` if the two strings `s1` and `s2` are anagrams of each other; otherwise, it returns `false`. In your code, you may modify any of the characters in `s1` and `s2`, and may use any function in the `string.h` library. You can also assume that both strings will only contain characters from the alphabet (upper case and lower case) and
 the space character. Also, note that the upper case `'A'` is NOT considered as the same character as lower case `'a'`.
