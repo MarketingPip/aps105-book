@@ -29,11 +29,7 @@ function convertTomlToJs(tomlPath, jsPath) {
         });
     }
 
-    const jsData = `let parsedObject; \n  parsedObject = ${JSON.stringify(
-        jsonData,
-        null,
-        2
-    )};`;
+    const jsData = `let parsedObject = ${JSON.stringify(jsonData, null, 2)};`;
     fs.writeFileSync(jsPath, jsData);
 }
 
