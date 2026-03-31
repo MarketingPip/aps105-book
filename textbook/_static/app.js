@@ -1,3 +1,34 @@
+const storage = (() => {
+  const isAvailable = typeof window !== 'undefined' && (() => {
+    try {
+      const testKey = '__storage_test__';
+      window.localStorage.setItem(testKey, testKey);
+      window.localStorage.removeItem(testKey);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  })();
+
+  if (isAvailable) {
+    return window.localStorage;
+  }
+
+  // Mock implementation matching the Storage interface (getItem, setItem, removeItem, clear, length)
+  const memoryStore = new Map();
+
+  return {
+    getItem: (key) => (memoryStore.has(String(key)) ? memoryStore.get(String(key)) : null),
+    setItem: (key, value) => memoryStore.set(String(key), String(value)),
+    removeItem: (key) => memoryStore.delete(String(key)),
+    clear: () => memoryStore.clear(),
+    key: (index) => Array.from(memoryStore.keys())[index] || null,
+    get length() {
+      return memoryStore.size;
+    }
+  };
+})();
+
 let currentQuestionIndex = 0;
 
 function startQuiz() {
@@ -5,10 +36,10 @@ function startQuiz() {
     const filename = window.quizFilename || "unknown";
 
     const key = `startClickCount_${filename}`;
-    let startClickCount = parseInt(localStorage.getItem(key) || "0");
+    let startClickCount = parseInt(storage.getItem(key) || "0");
 
     startClickCount++;
-    localStorage.setItem(key, startClickCount);
+    storage.setItem(key, startClickCount);
 
     const userID = getOrCreateUserID();
     // Send event to Google Analytics
@@ -93,7 +124,7 @@ function startQuiz() {
 }
 
 window.addEventListener("load", () => {
-    if (localStorage.getItem("formsLocked") === "true") {
+    if (storage.getItem("formsLocked") === "true") {
         const quizForms = document.querySelectorAll("[id^='quizForm']");
 
         for (let i = 0; i < quizForms.length; i++) {
@@ -221,9 +252,9 @@ function closeFullscreenForm() {
                 traceTextarea.setAttribute("readonly", "");
             }
             
-            localStorage.setItem("formsLocked", "true");
+            storage.setItem("formsLocked", "true");
             
-            localStorage.setItem("displayTestcases", "true");
+            storage.setItem("displayTestcases", "true");
         
         }
     }
@@ -251,17 +282,17 @@ function parse_and_generate_form(fileName) {
 
     window.addEventListener("load", () => {
 
-        if (localStorage.getItem("displayTestcases") === "true" && localStorage.getItem("formsLocked") === "true"){
+        if (storage.getItem("displayTestcases") === "true" && storage.getItem("formsLocked") === "true"){
 
             const quizForms = document.querySelectorAll("[id^='quizForm']");
             for (let i = 0; i < quizForms.length; i++) {
                 const formId = "quizForm" + (i + 1);
                 const form = document.getElementById(formId);
 
-                let savedData = JSON.parse(localStorage.getItem(fileName + formId + "_programming"));                
+                let savedData = JSON.parse(storage.getItem(fileName + formId + "_programming"));                
                 if (savedData) displayTestcaseResults(form, savedData.inputArray, savedData.outputArray, savedData.actualOutput);
 
-                savedData = JSON.parse(localStorage.getItem(fileName + "quizForm" + (i + 1) + "_tracing"));
+                savedData = JSON.parse(storage.getItem(fileName + "quizForm" + (i + 1) + "_tracing"));
                 if (savedData) {
 
                     const messageElement = form.querySelector("#message" + (i + 1));
@@ -428,17 +459,11 @@ function parse_and_generate_form(fileName) {
         // Find and format single backticks
         const singleBacktickMatches = question.match(regexSingleBacktick);
         if (singleBacktickMatches) {
-            for (let j = 0; j < singleBacktickMatches.length; j++) {
-                const match = singleBacktickMatches[j];
-                const codeSnippet = match.slice(1, -1).trim();
-
-                // Create a new <code> element
-                const codeSnippetElement = document.createElement("code");
-                codeSnippetElement.classList.add("code-snippet-single");
-                codeSnippetElement.textContent = codeSnippet;
-
-                questionElement.innerHTML = questionElement.innerHTML.replace(match, codeSnippetElement.outerHTML);
-            }
+            // Sort matches by length (descending) to avoid partial replacement issues
+            // or better yet, use a single replace with a callback
+            questionElement.innerHTML = questionElement.innerHTML.replace(regexSingleBacktick, (match, codeSnippet) => {
+                return `<code class="code-snippet-single">${codeSnippet.trim()}</code>`;
+            });
         }
 
         form.appendChild(questionElement);
@@ -752,7 +777,7 @@ function parse_and_generate_form(fileName) {
 
         if (isProgrammingQuestion) {
 
-            const progData = JSON.parse(localStorage.getItem(fileName + "quizForm" + (i + 1) + "_programming"));
+            const progData = JSON.parse(storage.getItem(fileName + "quizForm" + (i + 1) + "_programming"));
 
             if (progData && typeof progData.totalTestcases !== "undefined") {
 
@@ -765,7 +790,7 @@ function parse_and_generate_form(fileName) {
 
         } else if (isTracingQuestion){
 
-            const progData = JSON.parse(localStorage.getItem(fileName + "quizForm" + (i + 1) + "_tracing"));
+            const progData = JSON.parse(storage.getItem(fileName + "quizForm" + (i + 1) + "_tracing"));
 
             if (progData && typeof progData.isCorrect !== "undefined") {
                 updateMessageElement(messageElement, progData.isCorrect, "", [], answer, false, false, isTracingQuestion);
@@ -775,7 +800,7 @@ function parse_and_generate_form(fileName) {
         } else {
 
             // Check if there are stored values for the current form
-            const selectedIndices = JSON.parse(localStorage.getItem(fileName + "quizForm" + (i + 1) + "_choices"));
+            const selectedIndices = JSON.parse(storage.getItem(fileName + "quizForm" + (i + 1) + "_choices"));
             if (selectedIndices && selectedIndices.length !== 0) {
                 const choiceInputs = selectedIndices.map(index => 
                     document.getElementById("choice" + (i + 1) + "-" + (index + 1)));
@@ -895,7 +920,7 @@ async function handle_submission(formId, answer, hint, filename, outputArray, is
         const editor = ace.edit(editorContainer); // ace editor instance for that container
         const code = editor.getValue();            
         
-        localStorage.setItem(baseKey + "_programming", JSON.stringify({
+        storage.setItem(baseKey + "_programming", JSON.stringify({
             originalCode: originalCode,
             userCode: code,
             outputUI: outputUI,
@@ -912,13 +937,13 @@ async function handle_submission(formId, answer, hint, filename, outputArray, is
         const correctTracingOutput = (Array.isArray(answer) ? answer[0] : answer || "").trim();
         const isCorrect = normalizeOutput(userOutput) === normalizeOutput(correctTracingOutput);
 
-        localStorage.setItem(baseKey + "_tracing", JSON.stringify({
+        storage.setItem(baseKey + "_tracing", JSON.stringify({
             userOutput: userOutput,
             isCorrect: isCorrect
         }));
 
     } else {
-        localStorage.setItem(baseKey + "_choices", JSON.stringify(selectedIndices));
+        storage.setItem(baseKey + "_choices", JSON.stringify(selectedIndices));
     }
 
 }
@@ -1244,8 +1269,8 @@ function diffCheck(expected, actual) {
 
 function resetQuiz(fileName) {
 
-    localStorage.removeItem("formsLocked");
-    localStorage.removeItem("displayTestcases");
+    storage.removeItem("formsLocked");
+    storage.removeItem("displayTestcases");
 
     const quizForms = document.querySelectorAll("[id^='quizForm']");
 
@@ -1259,7 +1284,7 @@ function resetQuiz(fileName) {
         if (existingTestcaseContainer) existingTestcaseContainer.remove();
 
         let key = fileName + "quizForm" + (i+1) + "_programming";
-        let progData = JSON.parse(localStorage.getItem(key));
+        let progData = JSON.parse(storage.getItem(key));
 
         if (progData){ // true if programming question
 
@@ -1291,14 +1316,14 @@ function resetQuiz(fileName) {
                 codeRunner.parentNode.replaceChild(newCodeRunner, codeRunner);
             }
 
-            localStorage.removeItem(key);
+            storage.removeItem(key);
         }
 
         key = fileName + "quizForm" + (i+1) + "_tracing";
-        progData = JSON.parse(localStorage.getItem(key));
+        progData = JSON.parse(storage.getItem(key));
 
         if (progData) {
-            localStorage.removeItem(key);
+            storage.removeItem(key);
             
             const traceTextarea = quizForms[i].querySelector(".trace-textarea");
             if (traceTextarea) {
@@ -1320,11 +1345,11 @@ function resetQuiz(fileName) {
     //clear local storage answers
     const prefix = fileName;
 
-    for (let i = localStorage.length - 1; i >= 0; i--) {
-        const key = localStorage.key(i);
+    for (let i = storage.length - 1; i >= 0; i--) {
+        const key = storage.key(i);
     
         if (key && key.startsWith(prefix)) {
-            localStorage.removeItem(key);
+            storage.removeItem(key);
         }
     
     }
