@@ -51,7 +51,6 @@
     <script src="_static/chatbot.js"></script>
     <script src="_static/highlight_scroll.js"></script>
     <script src="_static/app.js"></script>
-    <script src="_static/toml_to_js_convertor.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="_static/design-tabs.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
@@ -178,8 +177,8 @@ const thebe_selector_output = ".output, .cell_output"
 
 </style>
 
-<script>
-  // document.addEventListener('DOMContentLoaded', function() {
+<script type="module">
+  import storage from "./_static/storage.js"
   const keywordSearchTab = document.getElementById('keyword-search-tab');
   const semanticSearchTab = document.getElementById('semantic-search-tab');
   const keywordSearchForm = document.getElementById('keyword-search-form');
@@ -193,7 +192,7 @@ const thebe_selector_output = ".output, .cell_output"
       semanticSearchForm.classList.remove('d-flex');
       keywordSearchTab.classList.add('active');
       semanticSearchTab.classList.remove('active');
-      localStorage.setItem('lastSearchType', 'keyword');
+      storage.setItem('lastSearchType', 'keyword');
     } else {
       keywordSearchForm.classList.add('hide-search-bar');
       keywordSearchForm.classList.remove('d-flex');
@@ -201,14 +200,14 @@ const thebe_selector_output = ".output, .cell_output"
       semanticSearchForm.classList.add('d-flex');
       keywordSearchTab.classList.remove('active');
       semanticSearchTab.classList.add('active');
-      localStorage.setItem('lastSearchType', 'semantic');
+      storage.setItem('lastSearchType', 'semantic');
     }
   }
 
   keywordSearchTab.addEventListener('click', () => setSearchBarState(true));
   semanticSearchTab.addEventListener('click', () => setSearchBarState(false));
 
-  const lastSearchType = localStorage.getItem('lastSearchType');
+  const lastSearchType = storage.getItem('lastSearchType');
     if (lastSearchType === 'keyword') {
       setSearchBarState(true); 
     } else {
@@ -221,7 +220,6 @@ const thebe_selector_output = ".output, .cell_output"
     const semanticSearchInput = document.getElementById('semantic-search-input');
     semanticSearchInput.value = query;
   };
-  // });
 </script>
   
 <script type="module">
@@ -1045,6 +1043,7 @@ title="Print to PDF"
 <script type="module">
 // min.js is enough to use model just for embed
 import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
+import storage from "./_static/storage.js"
 // ONNX is unecessary for this project for sympilicity
 // import * as ort from 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.js';
 
@@ -1068,7 +1067,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     // Check if the result is already in local storage
-    const cachedResult = localStorage.getItem(query);
+    const cachedResult = storage.getItem(query);
     if (cachedResult) {
       // console.log("Using cached result");
       const cachedData = JSON.parse(cachedResult);
@@ -1243,7 +1242,7 @@ async function performSemanticSearch(query) {
       return '';
     })
   };
-  localStorage.setItem(query, JSON.stringify(cachedData));
+  storage.setItem(query, JSON.stringify(cachedData));
 }
 
 /**
